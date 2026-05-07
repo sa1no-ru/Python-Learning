@@ -1,0 +1,95 @@
+import random
+import string
+from cryptography.fernet import Fernet
+a = int(input("Введите длину пароля (минимум 4): "))
+def generate_password_strong(length):
+    if length < 4:
+        return "Слишком короткий пароль (нужно минимум 4 символа)"
+    
+    lower = random.choice(string.ascii_lowercase)
+    upper = random.choice(string.ascii_uppercase)
+    digit = random.choice(string.digits)
+    punct = random.choice(string.punctuation)
+    
+    others = [random.choice(string.ascii_letters + string.digits + string.punctuation) for _ in range(length - 4)]
+    
+    password_list = [lower, upper, digit, punct] + others
+    random.shuffle(password_list)
+    
+    return ''.join(password_list)
+b= generate_password_strong(a)
+def check_strength(password):
+
+    has_lower = any(c.islower() for c in password)
+    has_upper = any(c.isupper() for c in password)
+    has_digit = any(c.isdigit() for c in password)
+    has_punct = any(c in string.punctuation for c in password)
+    
+    score = 0
+    if has_lower: score += 1
+    if has_upper: score += 1
+    if has_digit: score += 1
+    if has_punct: score += 1
+    if len(password) >= 8: score += 1
+    
+    if score <= 2:
+        return "слабый"
+    elif score <= 4:
+        return "средний"
+    else:
+        return "сильный"
+def save_you(b,login,l):
+    with open("password.txt","a") as d:
+        d.write(f"Логин: {login} || Пароль: {b} || Надежность: {l}\n")
+l=check_strength(b)
+login=input("Введите логин: ")
+save_you(b,login,l)  
+print("Сохранено.")     
+def history():
+    with open("password.txt","r")as p:
+     return p.read()
+def find_password_by_login(target_login):
+    try:
+        with open("password.txt","r") as f:
+            for line in f:
+                if f"Логин: {target_login} ||" in line:
+                    return line.strip()
+                
+        return "Не найдено"
+    except FileNotFoundError:
+        return"Файла с поролями нет." 
+def delete_password_by_login(target_login):
+
+    try:
+        with open("password.txt", "r") as f:
+            lines = f.readlines()
+        
+        with open("password.txt", "w") as f:
+            deleted = False
+            for line in lines:
+                if f"Логин: {target_login} ||" not in line:
+                    f.write(line)
+                else:
+                    deleted = True
+            if deleted:
+                print(f"Запись для логина '{target_login}' удалена.")
+            else:
+                print(f"Логин '{target_login}' не найден.")
+    except FileNotFoundError:
+        print("Файл с паролями не найден.")
+print("Сгенерированный пароль:", b)
+print("Надёжность пароля:",l)
+print("y- Найти пороль по логину || delete-удалить логин с паролём || history- показать историю паролей !!!")
+find_log=input("Список команд: y || delete|| history: ")
+if find_log.lower() =="y":
+        target=input("Введите логин:")
+        found= find_password_by_login(target)
+        print(found)
+elif find_log =="delete":
+    target = input("Введите логин для удаления: ")
+    delete_password_by_login(target)
+elif find_log =="history":
+    show_history= history()
+    print(show_history)
+else:
+    print("Пока")
